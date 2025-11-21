@@ -1,0 +1,25 @@
+{
+  "name": "veen-platform",
+  "version": "1.0.0",
+  "description": "Veen AI Resume Platform - Full Stack Application",
+  "main": "server/server.js",
+  "scripts": {
+    "server": "node server/server.js",
+    "client": "cd client && npm run dev",
+    "install:all": "npm install && cd client && npm install",
+    "dev": "echo 'Run npm run server in one terminal and npm run client in another'"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "uuid": "^9.0.1",
+    "pdfkit": "^0.15.0",
+    "multer": "^1.4.5-lts.1",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.2"
+  }
+}
