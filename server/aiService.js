@@ -46,7 +46,9 @@ exports.tailorResumeWithAI = async (resumeText, jobDescription, provider = 'open
     // Default to OpenAI if no provider specified
     const aiProvider = provider || 'openai';
 
-    const fullPrompt = `Existing Resume Content (JSON or plain text):
+    const fullPrompt = `You are a professional resume enhancement specialist. Your task is to improve and optimize a resume for a specific job while PRESERVING all original information.
+
+Existing Resume Content:
 ---
 ${resumeText}
 ---
@@ -56,7 +58,38 @@ Target Job Description:
 ${jobDescription}
 ---
 
-Please rewrite and optimize the Summary, Experience descriptions, and Skills section to perfectly match the job description's requirements. Maintain the structure and only output the result as a single JSON object.`;
+IMPORTANT INSTRUCTIONS:
+1. PRESERVE all original data: name, contact info, job titles, companies, dates, education
+2. ENHANCE the professional summary to match the job description keywords
+3. REWRITE experience descriptions to be more impactful and job-specific
+4. ADD relevant skills from the job description that match the candidate's background
+5. Keep all original experiences, education, and projects
+6. Output ONLY a valid JSON object with this structure:
+{
+  "name": "original name",
+  "title": "enhanced title based on job",
+  "contact": {
+    "email": "original email",
+    "phone": "original phone",
+    "location": "original location"
+  },
+  "links": {
+    "LinkedIn": "original linkedin",
+    "GitHub": "original github"
+  },
+  "professional_summary": "enhanced summary matching job keywords",
+  "professional_experience": [
+    {
+      "title": "original title",
+      "company": "original company",
+      "duration": "original dates",
+      "description": "ENHANCED achievement-focused description"
+    }
+  ],
+  "skills": ["enhanced skill list with job-relevant additions"],
+  "education": "original education or array",
+  "projects": ["original projects"]
+}`;
 
     if (aiProvider === 'gemini') {
         if (!GEMINI_API_KEY) {

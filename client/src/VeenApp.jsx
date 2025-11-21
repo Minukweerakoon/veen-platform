@@ -516,10 +516,37 @@ const UploadTailorPage = ({ setPage, setIsLoading, setMessage, isLoading, userPl
                 preserveOriginal: true // Tell backend to preserve original data
             });
             
-            // Set AI-enhanced data (this will be editable)
-            setTailoredData(result.tailoredJson);
+            // Merge original data with AI suggestions
+            // AI will fill in missing fields, but preserve original data
+            const enhancedData = {
+                // Preserve original contact info
+                name: result.tailoredJson.name || originalData?.name || '',
+                title: result.tailoredJson.title || originalData?.title || '',
+                email: result.tailoredJson.contact?.email || result.tailoredJson.email || originalData?.email || '',
+                phone: result.tailoredJson.contact?.phone || result.tailoredJson.phone || originalData?.phone || '',
+                location: result.tailoredJson.contact?.location || result.tailoredJson.location || originalData?.location || '',
+                linkedin: result.tailoredJson.links?.LinkedIn || result.tailoredJson.linkedin || originalData?.linkedin || '',
+                github: result.tailoredJson.links?.GitHub || result.tailoredJson.github || originalData?.github || '',
+                
+                // Use AI-enhanced summary but preserve original if AI didn't provide one
+                professional_summary: result.tailoredJson.professional_summary || result.tailoredJson.summary || originalData?.summary || '',
+                
+                // Merge experience - AI enhancements + original data
+                professional_experience: result.tailoredJson.professional_experience || result.tailoredJson.experience || originalData?.experience || [],
+                
+                // Skills - AI should enhance these based on job description
+                skills: result.tailoredJson.skills || originalData?.skills || [],
+                
+                // Education - preserve original
+                education: result.tailoredJson.education || originalData?.education || [],
+                
+                // Projects - preserve original
+                projects: result.tailoredJson.projects || originalData?.projects || []
+            };
+            
+            setTailoredData(enhancedData);
             setShowComparison(true);
-            setMessage({ text: "AI suggestions ready! Review and edit the enhanced version before saving.", type: 'success' });
+            setMessage({ text: "✓ AI-enhanced! Review your CV with improvements, edit as needed, then download.", type: 'success' });
 
         } catch (error) {
             setMessage({ text: `Tailoring Failed: ${error.message}`, type: 'error' });
