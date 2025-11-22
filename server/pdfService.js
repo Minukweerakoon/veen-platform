@@ -31,19 +31,21 @@ exports.generateResumePDF = (resumeData, outputPath) => {
 
             doc.moveDown(0.5);
 
-            // Contact Info
+            // Contact Info - handle both flat and nested contact structures
+            const email = resumeData.contact?.email || resumeData.email || '';
+            const phone = resumeData.contact?.phone || resumeData.phone || '';
+            const location = resumeData.contact?.location || resumeData.location || '';
+            const linkedin = resumeData.links?.LinkedIn || resumeData.linkedin || '';
+            const github = resumeData.links?.GitHub || resumeData.github || '';
+
             doc.fontSize(10)
                .fillColor('#666666')
-               .text([
-                   resumeData.email || '',
-                   resumeData.phone || '',
-                   resumeData.location || ''
-               ].filter(Boolean).join(' | '), { align: 'center' });
+               .text([email, phone, location].filter(Boolean).join(' | '), { align: 'center' });
 
-            if (resumeData.linkedin || resumeData.github) {
+            if (linkedin || github) {
                 doc.text([
-                    resumeData.linkedin ? `LinkedIn: ${resumeData.linkedin}` : '',
-                    resumeData.github ? `GitHub: ${resumeData.github}` : ''
+                    linkedin ? `LinkedIn: ${linkedin}` : '',
+                    github ? `GitHub: ${github}` : ''
                 ].filter(Boolean).join(' | '), { align: 'center' });
             }
 
@@ -52,7 +54,9 @@ exports.generateResumePDF = (resumeData, outputPath) => {
             doc.moveDown(1);
 
             // --- SUMMARY SECTION ---
-            if (resumeData.summary) {
+            // Handle both 'summary' and 'professional_summary' fields
+            const summary = resumeData.professional_summary || resumeData.summary;
+            if (summary) {
                 doc.fontSize(14)
                    .font('Helvetica-Bold')
                    .fillColor('#000000')
@@ -62,13 +66,15 @@ exports.generateResumePDF = (resumeData, outputPath) => {
                 doc.fontSize(10)
                    .font('Helvetica')
                    .fillColor('#333333')
-                   .text(resumeData.summary, { align: 'justify' });
+                   .text(summary, { align: 'justify' });
                 
                 doc.moveDown(1);
             }
 
             // --- EXPERIENCE SECTION ---
-            if (resumeData.experience && resumeData.experience.length > 0) {
+            // Handle both 'experience' and 'professional_experience' fields
+            const experience = resumeData.professional_experience || resumeData.experience || [];
+            if (experience && experience.length > 0) {
                 doc.fontSize(14)
                    .font('Helvetica-Bold')
                    .fillColor('#000000')
@@ -76,7 +82,7 @@ exports.generateResumePDF = (resumeData, outputPath) => {
                 
                 doc.moveDown(0.5);
 
-                resumeData.experience.forEach((exp, index) => {
+                experience.forEach((exp, index) => {
                     doc.fontSize(11)
                        .font('Helvetica-Bold')
                        .fillColor('#000000')
@@ -98,7 +104,7 @@ exports.generateResumePDF = (resumeData, outputPath) => {
                         });
                     }
 
-                    if (index < resumeData.experience.length - 1) {
+                    if (index < experience.length - 1) {
                         doc.moveDown(0.8);
                     }
                 });
@@ -107,7 +113,7 @@ exports.generateResumePDF = (resumeData, outputPath) => {
             }
 
             // --- EDUCATION SECTION ---
-            if (resumeData.education && resumeData.education.length > 0) {
+            if (resumeData.education) {
                 doc.fontSize(14)
                    .font('Helvetica-Bold')
                    .fillColor('#000000')
@@ -115,20 +121,35 @@ exports.generateResumePDF = (resumeData, outputPath) => {
                 
                 doc.moveDown(0.5);
 
-                resumeData.education.forEach((edu, index) => {
-                    doc.fontSize(11)
-                       .font('Helvetica-Bold')
-                       .fillColor('#000000')
-                       .text(edu.degree || 'Degree', { continued: true })
+                // Handle both string and array formats
+                if (typeof resumeData.education === 'string') {
+                    doc.fontSize(10)
                        .font('Helvetica')
-                       .text(` | ${edu.institution || 'Institution'}`, { continued: true })
-                       .fillColor('#666666')
-                       .text(` (${edu.duration || 'Duration'})`, { align: 'left' });
+                       .fillColor('#333333')
+                       .text(resumeData.education);
+                } else if (Array.isArray(resumeData.education)) {
+                    resumeData.education.forEach((edu, index) => {
+                        if (typeof edu === 'string') {
+                            doc.fontSize(10)
+                               .font('Helvetica')
+                               .fillColor('#333333')
+                               .text(edu);
+                        } else {
+                            doc.fontSize(11)
+                               .font('Helvetica-Bold')
+                               .fillColor('#000000')
+                               .text(edu.degree || 'Degree', { continued: true })
+                               .font('Helvetica')
+                               .text(` | ${edu.institution || 'Institution'}`, { continued: true })
+                               .fillColor('#666666')
+                               .text(` (${edu.duration || 'Duration'})`, { align: 'left' });
+                        }
 
-                    if (index < resumeData.education.length - 1) {
-                        doc.moveDown(0.5);
-                    }
-                });
+                        if (index < resumeData.education.length - 1) {
+                            doc.moveDown(0.5);
+                        }
+                    });
+                }
 
                 doc.moveDown(1);
             }
